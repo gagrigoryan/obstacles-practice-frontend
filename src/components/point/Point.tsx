@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { IPoint } from "../../domain/entities/point";
-import { Circle } from "react-konva";
+import { Circle, Text } from "react-konva";
 import Konva from "konva";
 
 type PointProps = IPoint & {
     onChange?: (point: IPoint) => void;
 };
 
-const Point: React.FC<PointProps> = ({ onChange, ...props }) => {
+const Point: React.FC<PointProps> = ({ onChange, x, y }) => {
     const [isHovered, setHovered] = useState<boolean>(false);
 
     const onDragMoveHandler = (event: Konva.KonvaEventObject<DragEvent>) => {
@@ -15,16 +15,22 @@ const Point: React.FC<PointProps> = ({ onChange, ...props }) => {
     };
 
     return (
-        <Circle
-            {...props}
-            radius={isHovered ? 8 : 6}
-            stroke="#e57373"
-            fill={!isHovered ? "#e57373" : undefined}
-            draggable
-            onMouseOver={() => setHovered(true)}
-            onMouseOut={() => setHovered(false)}
-            onDragMove={onDragMoveHandler}
-        />
+        <>
+            {isHovered && (
+                <Text fontStyle="bold" x={x} y={y} offsetX={28} offsetY={24} text={`(${x}, ${y})`} fill="#e57373" />
+            )}
+            <Circle
+                x={x}
+                y={y}
+                radius={isHovered ? 8 : 6}
+                stroke="#e57373"
+                fill={!isHovered ? "#e57373" : undefined}
+                draggable
+                onMouseOver={() => setHovered(true)}
+                onMouseOut={() => setHovered(false)}
+                onDragMove={onDragMoveHandler}
+            />
+        </>
     );
 };
 
