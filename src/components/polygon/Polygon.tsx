@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IPolygon } from "../../domain/entities/polygon";
-import { Line } from "react-konva";
+import { Line, Transformer } from "react-konva";
 import { IPoint } from "../../domain/entities/point";
 import Point from "../point";
 import Konva from "konva";
@@ -32,6 +32,12 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
         });
     };
 
+    const onTransformEndHandler = (event: Konva.KonvaEventObject<Event>) => {
+        setDragged(false);
+        // Для трансформации нужны будут поля rotation, scaleX, scaleY
+        console.log(event);
+    };
+
     useEffect(() => {
         if (!transformerRef.current || !polygonRef.current) {
             return;
@@ -51,19 +57,13 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
                 draggable
                 onDragStart={() => setDragged(true)}
                 onDragEnd={onDragEndHandler}
+                onTransformStart={() => setDragged(true)}
+                onTransformEnd={onTransformEndHandler}
             />
-            {/*Для масштабирования и ресайза*/}
 
-            {/*<Transformer*/}
-            {/*    ref={transformerRef}*/}
-            {/*    boundBoxFunc={(oldBox, newBox) => {*/}
-            {/*        // limit resize*/}
-            {/*        if (newBox.width < 5 || newBox.height < 5) {*/}
-            {/*            return oldBox;*/}
-            {/*        }*/}
-            {/*        return newBox;*/}
-            {/*    }}*/}
-            {/*/>*/}
+            {/*Для масштабирования и ресайза*/}
+            {/*<Transformer ref={transformerRef} />*/}
+
             {!isDragged &&
                 points.map((point, index) => (
                     <Point key={index.toString()} {...point} onChange={(point) => onPointChangeHandler(point, index)} />
