@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IPolygon } from "../../domain/entities/polygon";
 import { Line } from "react-konva";
 import { IPoint } from "../../domain/entities/point";
@@ -11,6 +11,8 @@ type PolygonProps = IPolygon & {
 };
 
 const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
+    const polygonRef = useRef<Konva.Line | null>(null);
+    const transformerRef = useRef<Konva.Transformer | null>(null);
     const [isDragged, setDragged] = useState<boolean>(false);
 
     const onPointChangeHandler = (sourcePoint: IPoint, sourceIndex: number) => {
@@ -30,9 +32,18 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
         });
     };
 
+    useEffect(() => {
+        if (!transformerRef.current || !polygonRef.current) {
+            return;
+        }
+        transformerRef.current.nodes([polygonRef.current]);
+        transformerRef.current.getLayer()?.batchDraw();
+    }, []);
+
     return (
         <>
             <Line
+                ref={polygonRef}
                 points={getPreparedPoints(points)}
                 closed
                 fill="#e5737366"
@@ -41,6 +52,18 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
                 onDragStart={() => setDragged(true)}
                 onDragEnd={onDragEndHandler}
             />
+            {/*Для масштабирования и ресайза*/}
+
+            {/*<Transformer*/}
+            {/*    ref={transformerRef}*/}
+            {/*    boundBoxFunc={(oldBox, newBox) => {*/}
+            {/*        // limit resize*/}
+            {/*        if (newBox.width < 5 || newBox.height < 5) {*/}
+            {/*            return oldBox;*/}
+            {/*        }*/}
+            {/*        return newBox;*/}
+            {/*    }}*/}
+            {/*/>*/}
             {!isDragged &&
                 points.map((point, index) => (
                     <Point key={index.toString()} {...point} onChange={(point) => onPointChangeHandler(point, index)} />
