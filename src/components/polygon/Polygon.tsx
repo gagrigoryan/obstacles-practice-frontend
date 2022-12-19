@@ -1,75 +1,117 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IPolygon } from "../../domain/entities/polygon";
 import { Line, Transformer } from "react-konva";
+import Konva from "konva";
+
+import { IPolygon } from "../../domain/entities/polygon";
 import { IPoint } from "../../domain/entities/point";
 import Point from "../point";
-import Konva from "konva";
 import { getPreparedPoints } from "../../utils/getPreparedPoints";
 
 type PolygonProps = IPolygon & {
-    onChange?: (polygon: IPolygon) => void;
+  onChange?: (polygon: IPolygon) => void;
+  isSelected: boolean;
+  onSelect: () => void;
 };
 
-const Polygon: React.FC<PolygonProps> = ({ id, points, onChange }) => {
-    const polygonRef = useRef<Konva.Line | null>(null);
-    const transformerRef = useRef<Konva.Transformer | null>(null);
-    const [isDragged, setDragged] = useState<boolean>(false);
+const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, onSelect, onChange }) => {
+  const polygonRef = useRef<Konva.Line | null>(null);
+  const transformerRef = useRef<Konva.Transformer | null>(null);
+  const polygonPointsRef = useRef<IPoint[]>([]);
+  const [isDragged, setDragged] = useState<boolean>(false);
 
-    const onPointChangeHandler = (sourcePoint: IPoint, sourceIndex: number) => {
-        onChange?.({ id, points: points.map((point, index) => (index === sourceIndex ? sourcePoint : point)) });
-    };
+  const onPointChangeHandler = (sourcePoint: IPoint, sourceIndex: number) => {
+    onChange?.({
+      id,
+      linePoints: linePoints.map((linePoint, index) => (index === sourceIndex ? sourcePoint : linePoint)),
+      points,
+    });
+  };
 
-    const onDragEndHandler = (event: Konva.KonvaEventObject<DragEvent>) => {
-        setDragged(false);
-        const { x, y } = event.target.position();
-        event.target.position({ x: 0, y: 0 });
-        onChange?.({
-            id,
-            points: points.map((point) => ({
-                x: point.x + x,
-                y: point.y + y,
-            })),
-        });
-    };
+  const onDragEndHandler = (event: Konva.KonvaEventObject<DragEvent>) => {
+    setDragged(false);
+    const { x, y } = event.target.position();
+    event.target.position({ x: 0, y: 0 });
 
-    const onTransformEndHandler = (event: Konva.KonvaEventObject<Event>) => {
-        setDragged(false);
-        // Для трансформации нужны будут поля rotation, scaleX, scaleY
-        console.log(event);
-    };
+    // считаем новое положение точек
+    const newPoints = linePoints.map((linePoint) => ({
+      x: linePoint.x + x,
+      y: linePoint.y + y,
+    }));
 
-    useEffect(() => {
-        if (!transformerRef.current || !polygonRef.current) {
-            return;
-        }
-        transformerRef.current.nodes([polygonRef.current]);
-        transformerRef.current.getLayer()?.batchDraw();
-    }, []);
+    polygonPointsRef.current = newPoints;
 
-    return (
-        <>
-            <Line
-                ref={polygonRef}
-                points={getPreparedPoints(points)}
-                closed
-                fill="#e5737366"
-                stroke="#e57373"
-                draggable
-                onDragStart={() => setDragged(true)}
-                onDragEnd={onDragEndHandler}
-                onTransformStart={() => setDragged(true)}
-                onTransformEnd={onTransformEndHandler}
-            />
+    onChange?.({
+      id,
+      linePoints: newPoints,
+      points: newPoints,
+    });
+  };
 
-            {/*Для масштабирования и ресайза*/}
-            {/*<Transformer ref={transformerRef} />*/}
+  const onTransformEndHandler = (event: Konva.KonvaEventObject<Event>) => {
+    setDragged(false);
+    const prevPoints = polygonPointsRef.current;
 
-            {!isDragged &&
-                points.map((point, index) => (
-                    <Point key={index.toString()} {...point} onChange={(point) => onPointChangeHandler(point, index)} />
-                ))}
-        </>
-    );
+    // считаем новое положение точек
+    const newPoints = prevPoints.map((point) => {
+      const newPoint = event.target.getAbsoluteTransform().point(point);
+
+      return {
+        x: newPoint.x,
+        y: newPoint.y,
+      };
+    });
+
+    const polygon = polygonRef.current;
+
+    // возвращаем исходный вид
+    polygon?.scaleX(1);
+    polygon?.scaleY(1);
+
+    event.target.position({ x: 0, y: 0 });
+    event.target.rotation(0);
+
+    onChange?.({
+      id,
+      points: newPoints,
+      linePoints: newPoints,
+    });
+  };
+
+  useEffect(() => {
+    polygonPointsRef.current = points;
+
+    if (!transformerRef.current || !polygonRef.current || !isSelected) {
+      return;
+    }
+    transformerRef.current.nodes([polygonRef.current]);
+    transformerRef.current.getLayer()?.batchDraw();
+  }, [isSelected]);
+
+  return (
+    <>
+      <Line
+        ref={polygonRef}
+        points={getPreparedPoints(linePoints)}
+        closed
+        fill="#e5737366"
+        stroke="#e57373"
+        draggable
+        onClick={onSelect}
+        onTap={onSelect}
+        onDragStart={() => setDragged(true)}
+        onDragEnd={onDragEndHandler}
+        onTransformStart={() => setDragged(true)}
+        onTransformEnd={onTransformEndHandler}
+      />
+
+      {isSelected && <Transformer ref={transformerRef} />}
+
+      {!isDragged &&
+        points.map((point, index) => (
+          <Point key={index.toString()} {...point} onChange={(point) => onPointChangeHandler(point, index)} />
+        ))}
+    </>
+  );
 };
 
 export default Polygon;

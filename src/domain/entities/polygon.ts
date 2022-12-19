@@ -1,6 +1,7 @@
 import { IPoint } from "./point";
 
-export interface IPolygon {
+export type IPolygon = {
     id: number;
     points: IPoint[];
+    linePoints: IPoint[];
 }
