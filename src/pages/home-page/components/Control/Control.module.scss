@@ -11,6 +11,11 @@
   margin: 0 3px;
   background-color: white;
   text-transform: uppercase;
+
+  &[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .activeButton {

@@ -17,6 +17,7 @@ const HomePage: React.FC = () => {
   const [selectedId, selectShape] = useState<number | null>(null);
   const [mode, setMode] = useState<IMode>("edit");
   const [newPolygonIndex, setNewPolygonIndex] = useState<number>(+uniqueId());
+  const [isDisabledEditBtn, setIsDisabledEditBtn] = useState<boolean>(false);
 
   const checkDeselect = (event: Konva.KonvaEventObject<Event>) => {
     // снимаем выбор когда кликаем на пустое место
@@ -29,6 +30,7 @@ const HomePage: React.FC = () => {
 
   const onClickHandler = (event: Konva.KonvaEventObject<MouseEvent>) => {
     if (mode === "create") {
+      setIsDisabledEditBtn(true);
       const point: IPoint = event.target.getRelativePointerPosition();
 
       const isOldPolygon = polygonList?.find((item) => item.id === newPolygonIndex);
@@ -56,6 +58,7 @@ const HomePage: React.FC = () => {
   const handleFinishCreate = () => {
     setNewPolygonIndex(+uniqueId());
     setMode("edit");
+    setIsDisabledEditBtn(false);
   };
 
   const handleDeletePolygon = () => {
@@ -91,6 +94,7 @@ const HomePage: React.FC = () => {
         onFinishCreate={handleFinishCreate}
         onDeletePolygon={handleDeletePolygon}
         selectedId={selectedId}
+        isDisabledEditBtn={isDisabledEditBtn}
       />
     </main>
   );

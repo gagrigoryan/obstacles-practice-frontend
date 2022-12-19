@@ -9,11 +9,19 @@ type ControlProps = {
   onFinishCreate: () => void;
   onDeletePolygon: () => void;
   selectedId: number | null;
+  isDisabledEditBtn: boolean;
 };
 
 const modes: IMode[] = ["create", "edit"];
 
-const Control: React.FC<ControlProps> = ({ setMode, mode, onFinishCreate, selectedId, onDeletePolygon }) => {
+const Control: React.FC<ControlProps> = ({
+  setMode,
+  mode,
+  onFinishCreate,
+  selectedId,
+  onDeletePolygon,
+  isDisabledEditBtn,
+}) => {
   return (
     <div className={s.root}>
       <div>
@@ -21,7 +29,8 @@ const Control: React.FC<ControlProps> = ({ setMode, mode, onFinishCreate, select
           <button
             key={text}
             className={`${s.controlButton} ${mode === text && s.activeButton}`}
-            onClick={() => setMode(text)}>
+            onClick={() => setMode(text)}
+            disabled={text === "edit" && isDisabledEditBtn}>
             {text}
           </button>
         ))}
