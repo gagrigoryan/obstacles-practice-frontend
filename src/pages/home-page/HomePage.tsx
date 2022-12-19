@@ -59,6 +59,11 @@ const HomePage: React.FC = () => {
     setPolygonList(polygonList.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon)));
   };
 
+  const handleFinishCreate = () => {
+    setNewPolygonIndex(newPolygonIndex + 1);
+    setMode("edit");
+  };
+
   useEffect(() => {
     if (mode === "create") {
       selectShape(null);
@@ -80,7 +85,7 @@ const HomePage: React.FC = () => {
           />
         ))}
       </CanvasLayer>
-      <Control setMode={setMode} mode={mode} setNewPolygonIndex={() => setNewPolygonIndex(newPolygonIndex + 1)} />
+      <Control setMode={setMode} mode={mode} onFinishCreate={handleFinishCreate} />
     </main>
   );
 };
