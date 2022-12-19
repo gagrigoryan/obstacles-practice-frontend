@@ -95,7 +95,7 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
     }
     transformerRef.current.nodes([polygonRef.current]);
     transformerRef.current.getLayer()?.batchDraw();
-  }, [isSelected]);
+  }, [isSelected, points]);
 
   return (
     <>
