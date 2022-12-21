@@ -68,11 +68,31 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleSetPolygonsFromFile = (polygonsPoints: IPoint[][]) => {
+    const polygons = polygonsPoints.reduce((acc, item) => {
+      acc.push({
+        id: +uniqueId(),
+        points: item,
+        linePoints: item,
+      });
+
+      return acc;
+    }, [] as IPolygon[]);
+
+    setPolygonList([...polygonList, ...polygons]);
+  };
+
+  const handleClearScreen = () => {
+    setPolygonList([]);
+    selectShape(null);
+  };
+
   useEffect(() => {
     if (mode === "create") {
       selectShape(null);
     }
   }, [mode]);
+
   return (
     <main className={styles.container}>
       <CanvasLayer onClick={onClickHandler} checkDeselect={checkDeselect}>
@@ -95,6 +115,8 @@ const HomePage: React.FC = () => {
         onDeletePolygon={handleDeletePolygon}
         selectedId={selectedId}
         isDisabledEditBtn={isDisabledEditBtn}
+        handleSetPolygonsFromFile={handleSetPolygonsFromFile}
+        handleClearScreen={handleClearScreen}
       />
     </main>
   );

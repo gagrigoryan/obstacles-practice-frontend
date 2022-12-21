@@ -3,7 +3,7 @@
   left: 0;
   top: 0;
   display: flex;
-  padding: 40px;
+  margin: 40px;
 }
 
 .controlButton {
@@ -11,6 +11,7 @@
   margin: 0 3px;
   background-color: white;
   text-transform: uppercase;
+  user-select: none;
 
   &[disabled] {
     opacity: 0.4;
