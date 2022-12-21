@@ -7,7 +7,7 @@ import { IPolygon } from "../../domain/entities/polygon";
 import { IPoint } from "../../domain/entities/point";
 
 import Control from "./components/Control";
-
+import { uniqueId, isNil } from "lodash";
 import styles from "./HomePage.module.scss";
 
 export type IMode = "create" | "edit";
@@ -16,7 +16,8 @@ const HomePage: React.FC = () => {
   const [polygonList, setPolygonList] = useState<IPolygon[]>([]);
   const [selectedId, selectShape] = useState<number | null>(null);
   const [mode, setMode] = useState<IMode>("edit");
-  const [newPolygonIndex, setNewPolygonIndex] = useState<number>(0);
+  const [newPolygonIndex, setNewPolygonIndex] = useState<number>(+uniqueId());
+  const [isDisabledEditBtn, setIsDisabledEditBtn] = useState<boolean>(false);
 
   const checkDeselect = (event: Konva.KonvaEventObject<Event>) => {
     // снимаем выбор когда кликаем на пустое место
@@ -29,17 +30,15 @@ const HomePage: React.FC = () => {
 
   const onClickHandler = (event: Konva.KonvaEventObject<MouseEvent>) => {
     if (mode === "create") {
+      setIsDisabledEditBtn(true);
       const point: IPoint = event.target.getRelativePointerPosition();
 
-      const isOldPolygon = polygonList?.[newPolygonIndex];
-
-      const currentPolygon: IPolygon = isOldPolygon
-        ? polygonList?.[newPolygonIndex]
-        : {
-            id: newPolygonIndex,
-            linePoints: [],
-            points: [],
-          };
+      const isOldPolygon = polygonList?.find((item) => item.id === newPolygonIndex);
+      const currentPolygon: IPolygon = isOldPolygon || {
+        id: newPolygonIndex,
+        linePoints: [],
+        points: [],
+      };
 
       currentPolygon.linePoints.push(point);
       currentPolygon.points.push(point);
@@ -47,10 +46,7 @@ const HomePage: React.FC = () => {
       if (!isOldPolygon) {
         setPolygonList([...polygonList, currentPolygon]);
       } else {
-        const newPolygonList = [...polygonList];
-        newPolygonList[newPolygonIndex] = currentPolygon;
-
-        setPolygonList(newPolygonList);
+        setPolygonList([...[...polygonList].filter((item) => item.id !== currentPolygon.id), currentPolygon]);
       }
     }
   };
@@ -59,12 +55,24 @@ const HomePage: React.FC = () => {
     setPolygonList(polygonList.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon)));
   };
 
+  const handleFinishCreate = () => {
+    setNewPolygonIndex(+uniqueId());
+    setMode("edit");
+    setIsDisabledEditBtn(false);
+  };
+
+  const handleDeletePolygon = () => {
+    if (!isNil(selectedId)) {
+      setPolygonList([...polygonList].filter((polygon) => polygon.id !== selectedId));
+      selectShape(null);
+    }
+  };
+
   useEffect(() => {
     if (mode === "create") {
       selectShape(null);
     }
   }, [mode]);
-
   return (
     <main className={styles.container}>
       <CanvasLayer onClick={onClickHandler} checkDeselect={checkDeselect}>
@@ -80,7 +88,14 @@ const HomePage: React.FC = () => {
           />
         ))}
       </CanvasLayer>
-      <Control setMode={setMode} mode={mode} setNewPolygonIndex={() => setNewPolygonIndex(newPolygonIndex + 1)} />
+      <Control
+        setMode={setMode}
+        mode={mode}
+        onFinishCreate={handleFinishCreate}
+        onDeletePolygon={handleDeletePolygon}
+        selectedId={selectedId}
+        isDisabledEditBtn={isDisabledEditBtn}
+      />
     </main>
   );
 };

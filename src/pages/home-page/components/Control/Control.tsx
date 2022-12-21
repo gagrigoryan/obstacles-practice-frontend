@@ -1,16 +1,27 @@
 import { IMode } from "../../HomePage";
+import { isNil } from "lodash";
 
 import s from "./Control.module.scss";
 
 type ControlProps = {
   setMode: (mode: IMode) => void;
   mode: IMode;
-  setNewPolygonIndex: () => void;
+  onFinishCreate: () => void;
+  onDeletePolygon: () => void;
+  selectedId: number | null;
+  isDisabledEditBtn: boolean;
 };
 
 const modes: IMode[] = ["create", "edit"];
 
-const Control: React.FC<ControlProps> = ({ setMode, mode, setNewPolygonIndex }) => {
+const Control: React.FC<ControlProps> = ({
+  setMode,
+  mode,
+  onFinishCreate,
+  selectedId,
+  onDeletePolygon,
+  isDisabledEditBtn,
+}) => {
   return (
     <div className={s.root}>
       <div>
@@ -18,15 +29,23 @@ const Control: React.FC<ControlProps> = ({ setMode, mode, setNewPolygonIndex }) 
           <button
             key={text}
             className={`${s.controlButton} ${mode === text && s.activeButton}`}
-            onClick={() => setMode(text)}>
+            onClick={() => setMode(text)}
+            disabled={text === "edit" && isDisabledEditBtn}>
             {text}
           </button>
         ))}
       </div>
       {mode === "create" && (
         <div className={s.additionalControl}>
-          <button className={s.controlButton} onClick={setNewPolygonIndex}>
+          <button className={s.controlButton} onClick={onFinishCreate}>
             Finish
+          </button>
+        </div>
+      )}
+      {mode === "edit" && !isNil(selectedId) && (
+        <div className={s.additionalControl}>
+          <button className={s.controlButton} onClick={onDeletePolygon}>
+            Delete
           </button>
         </div>
       )}

@@ -77,6 +77,16 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
     });
   };
 
+  const handleMouseUpTransformer = () => {
+    polygonPointsRef.current = points;
+
+    if (!transformerRef.current || !polygonRef.current) {
+      return;
+    }
+    transformerRef.current.nodes([polygonRef.current]);
+    transformerRef.current.getLayer()?.batchDraw();
+  };
+
   useEffect(() => {
     polygonPointsRef.current = points;
 
@@ -85,7 +95,7 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
     }
     transformerRef.current.nodes([polygonRef.current]);
     transformerRef.current.getLayer()?.batchDraw();
-  }, [isSelected]);
+  }, [isSelected, points]);
 
   return (
     <>
@@ -104,7 +114,7 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
         onTransformEnd={onTransformEndHandler}
       />
 
-      {isSelected && <Transformer ref={transformerRef} />}
+      {isSelected && <Transformer onTransformEnd={handleMouseUpTransformer} ref={transformerRef} padding={10} />}
 
       {!isDragged &&
         points.map((point, index) => (
