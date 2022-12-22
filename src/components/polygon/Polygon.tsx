@@ -103,8 +103,8 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
         ref={polygonRef}
         points={getPreparedPoints(linePoints)}
         closed
-        fill="#e5737366"
-        stroke="#e57373"
+        fill="#e8e8e8"
+        stroke="#333333"
         draggable
         onClick={onSelect}
         onTap={onSelect}

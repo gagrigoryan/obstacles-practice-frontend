@@ -1,9 +1,10 @@
 @import "../../styles/vars.module";
 
 .container {
+    max-height: calc(100vh - 75px);
+    margin-top: 75px !important;
     canvas {
-        max-height: calc(100vh - 75px);
-        background: rgba($pink, 0.3) !important;
-        top: 75px !important;
+        background: white !important;
+
     }
 }

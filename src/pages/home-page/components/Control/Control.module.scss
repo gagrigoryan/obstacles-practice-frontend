@@ -3,13 +3,15 @@
   left: 0;
   top: 0;
   display: flex;
-  margin: 20px;
+  padding: 20px;
+  width: 100%;
+  background-color: rgba(lightblue, 0.3);
 }
 
 .controlButton {
   padding: 10px 20px;
   margin: 0 3px;
-  background-color: white;
+  background-color: rgba(lightCoral, 0.3);
   text-transform: uppercase;
   user-select: none;
 

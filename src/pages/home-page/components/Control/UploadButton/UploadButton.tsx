@@ -4,9 +4,10 @@ import { IPoint } from "../../../../../domain/entities/point";
 type UploadButtonProps = {
   className?: string;
   handleFile: (polygonsPoints: IPoint[][]) => void;
+  isDisabledBtns: boolean;
 };
 
-const UploadButton: FC<UploadButtonProps> = ({ className, handleFile }) => {
+const UploadButton: FC<UploadButtonProps> = ({ className, handleFile, isDisabledBtns }) => {
   const hiddenFileInput = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -38,7 +39,7 @@ const UploadButton: FC<UploadButtonProps> = ({ className, handleFile }) => {
 
   return (
     <>
-      <button className={className} onClick={handleClick}>
+      <button className={className} onClick={handleClick} disabled={isDisabledBtns}>
         Load poly
       </button>
       <input type="file" ref={hiddenFileInput} onChange={handleChange} style={{ display: "none" }} />
