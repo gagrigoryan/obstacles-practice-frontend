@@ -16,6 +16,7 @@ type ControlProps = {
   isDisabledBtns: boolean;
   handleSetPolygonsFromFile: (polygons: IPoint[][]) => void;
   handleClearScreen: () => void;
+  onGetPath: () => void;
 };
 
 const modes: IMode[] = ["create", "edit"];
@@ -29,6 +30,7 @@ const Control: React.FC<ControlProps> = ({
   isDisabledBtns,
   handleSetPolygonsFromFile,
   handleClearScreen,
+  onGetPath,
 }) => {
   return (
     <div className={s.root}>
@@ -41,6 +43,10 @@ const Control: React.FC<ControlProps> = ({
 
         <button className={s.controlButton} onClick={handleClearScreen} disabled={isDisabledBtns}>
           Clear
+        </button>
+
+        <button className={s.controlButton} onClick={onGetPath}>
+          Get path
         </button>
 
         {modes.map((text) => (

@@ -9,11 +9,34 @@ import { IPoint } from "../../domain/entities/point";
 import Control from "./components/Control";
 import { uniqueId, isNil } from "lodash";
 import styles from "./HomePage.module.scss";
+import Path from "../../components/path";
 
 export type IMode = "create" | "edit";
 
+const mockPath = [
+  [
+    {
+      x: 618,
+      y: 14,
+    },
+    {
+      x: 601,
+      y: 35,
+    },
+    {
+      x: 674,
+      y: 80,
+    },
+    {
+      x: 581,
+      y: 124,
+    },
+  ],
+];
+
 const HomePage: React.FC = () => {
   const [polygonList, setPolygonList] = useState<IPolygon[]>([]);
+  const [path, setPath] = useState<IPolygon>();
   const [selectedId, selectShape] = useState<number | null>(null);
   const [mode, setMode] = useState<IMode>("edit");
   const [newPolygonIndex, setNewPolygonIndex] = useState<number>(+uniqueId());
@@ -84,7 +107,21 @@ const HomePage: React.FC = () => {
 
   const handleClearScreen = () => {
     setPolygonList([]);
+    setPath(undefined);
     selectShape(null);
+  };
+
+  const handleGetPath = () => {
+    const polygons = mockPath.reduce((acc, item) => {
+      acc.push({
+        id: +uniqueId(),
+        points: item,
+        linePoints: item,
+      });
+
+      return acc;
+    }, [] as IPolygon[]);
+    setPath(polygons[0]);
   };
 
   useEffect(() => {
@@ -107,6 +144,7 @@ const HomePage: React.FC = () => {
             }}
           />
         ))}
+        {path && <Path key={path.id.toString()} {...path} />}
       </CanvasLayer>
       <Control
         setMode={setMode}
@@ -117,6 +155,7 @@ const HomePage: React.FC = () => {
         isDisabledBtns={isDisabledBtns}
         handleSetPolygonsFromFile={handleSetPolygonsFromFile}
         handleClearScreen={handleClearScreen}
+        onGetPath={handleGetPath}
       />
     </main>
   );

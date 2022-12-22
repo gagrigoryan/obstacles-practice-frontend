@@ -6,6 +6,7 @@ import { IPolygon } from "../../domain/entities/polygon";
 import { IPoint } from "../../domain/entities/point";
 import Point from "../point";
 import { getPreparedPoints } from "../../utils/getPreparedPoints";
+import { Colors } from "../../domain/entities/colors";
 
 type PolygonProps = IPolygon & {
   onChange?: (polygon: IPolygon) => void;
@@ -103,8 +104,8 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
         ref={polygonRef}
         points={getPreparedPoints(linePoints)}
         closed
-        fill="#e8e8e8"
-        stroke="#333333"
+        fill={Colors.alabaster}
+        stroke={Colors.lightGray}
         draggable
         onClick={onSelect}
         onTap={onSelect}
