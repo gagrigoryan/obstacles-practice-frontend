@@ -2,6 +2,8 @@
 
 .container {
     canvas {
+        max-height: calc(100vh - 75px);
         background: rgba($pink, 0.3) !important;
+        top: 75px !important;
     }
 }
