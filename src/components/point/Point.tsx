@@ -22,7 +22,8 @@ const Point: React.FC<PointProps> = ({
   const [isHovered, setHovered] = useState<boolean>(false);
 
   const onDragMoveHandler = (event: Konva.KonvaEventObject<DragEvent>) => {
-    onChange?.({ ...event.target.attrs });
+    const { x, y } = event.target.attrs;
+    onChange?.({ x, y });
   };
 
   return (

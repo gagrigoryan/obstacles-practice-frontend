@@ -25,6 +25,11 @@
   background-color: rgb(151, 151, 151);
 }
 
-.additionalControl {
+.additionalButton {
+  composes: controlButton;
   margin-left: 30px;
+}
+
+.calculateWrapper {
+  margin-top: 20px;
 }

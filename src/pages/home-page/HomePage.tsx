@@ -12,6 +12,12 @@ import styles from "./HomePage.module.scss";
 import Path from "../../components/path";
 import { Colors } from "../../domain/entities/colors";
 import { BtnsDisable } from "../../domain/entities/btns";
+import { getPreparedPointForRequest } from "../../utils/getPreparedPointForRequest";
+import { fetchVisibilityGraph } from "../../domain/services/api/adapters/visibilityGraph";
+import { IPath } from "../../domain/entities/path";
+import { Line } from "react-konva";
+import { getPreparedPoints } from "../../utils/getPreparedPoints";
+import { fetchMinimalPath } from "../../domain/services/api/adapters/minimalPath";
 
 export type IMode = "create" | "edit" | "pathPoints";
 
@@ -53,6 +59,8 @@ const HomePage: React.FC = () => {
     delete: false,
     finish: false,
   });
+
+  const [calculatedMinimalPath, setCalculatedMinimalPath] = useState<IPath | null>(null);
 
   const checkDeselect = (event: Konva.KonvaEventObject<Event>) => {
     // снимаем выбор когда кликаем на пустое место
@@ -170,8 +178,29 @@ const HomePage: React.FC = () => {
     setPolygonList([]);
     setPath(undefined);
     selectShape(null);
+    setCalculatedMinimalPath(null);
     setStartFinishPoints([]);
     enableAllBtns();
+  };
+
+  const handleCalculateClick = async () => {
+    if (polygonList.length === 0) {
+      return;
+    }
+    try {
+      const preparedData = getPreparedPointForRequest(polygonList);
+      const response = await fetchVisibilityGraph(preparedData);
+      const { length } = response.nodes;
+      const minimalPathResponse = await fetchMinimalPath({
+        ...response,
+        start: length - 2,
+        finish: length - 1,
+      });
+
+      setCalculatedMinimalPath(minimalPathResponse.path);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleGetPath = () => {
@@ -234,6 +263,7 @@ const HomePage: React.FC = () => {
             />
           ))}
         {path && <Path key={path.id.toString()} {...path} />}
+        {/* {calculatedMinimalPath != null && <Line stroke="#0288d1" points={getPreparedPoints(calculatedMinimalPath)} />} */}
       </CanvasLayer>
       <Control
         setMode={setMode}
@@ -245,6 +275,8 @@ const HomePage: React.FC = () => {
         handleSetPolygonsFromFile={handleSetPolygonsFromFile}
         handleClearScreen={handleClearScreen}
         onGetPath={handleGetPath}
+        onCalculate={handleCalculateClick}
+        onReset={() => setCalculatedMinimalPath(null)}
       />
     </main>
   );
