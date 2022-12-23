@@ -4,4 +4,6 @@ export enum Colors {
   alabaster = "#f8f8f8",
   lightGray = "#eae6e6",
   silverSand = "#c3c7cc",
+  darkOrange = "#F92F03",
+  dodgerBlue = "#3d9dff",
 }

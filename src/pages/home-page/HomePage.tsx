@@ -10,8 +10,10 @@ import Control from "./components/Control";
 import { uniqueId, isNil } from "lodash";
 import styles from "./HomePage.module.scss";
 import Path from "../../components/path";
+import { Colors } from "../../domain/entities/colors";
+import { BtnsDisable } from "../../domain/entities/btns";
 
-export type IMode = "create" | "edit";
+export type IMode = "create" | "edit" | "pathPoints";
 
 const mockPath = [
   [
@@ -37,10 +39,20 @@ const mockPath = [
 const HomePage: React.FC = () => {
   const [polygonList, setPolygonList] = useState<IPolygon[]>([]);
   const [path, setPath] = useState<IPolygon>();
+  const [startFinishPoints, setStartFinishPoints] = useState<IPolygon[]>([]);
   const [selectedId, selectShape] = useState<number | null>(null);
   const [mode, setMode] = useState<IMode>("edit");
   const [newPolygonIndex, setNewPolygonIndex] = useState<number>(+uniqueId());
-  const [isDisabledBtns, setIsDisabledBtns] = useState<boolean>(false);
+  const [isDisabledBtns, setIsDisabledBtns] = useState<BtnsDisable>({
+    load: false,
+    clear: false,
+    getPath: false,
+    create: false,
+    edit: false,
+    pathPoints: false,
+    delete: false,
+    finish: false,
+  });
 
   const checkDeselect = (event: Konva.KonvaEventObject<Event>) => {
     // снимаем выбор когда кликаем на пустое место
@@ -51,9 +63,31 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const enableAllBtns = () => {
+    setIsDisabledBtns({
+      load: false,
+      clear: false,
+      getPath: false,
+      create: false,
+      edit: false,
+      pathPoints: false,
+      delete: false,
+      finish: false,
+    });
+  };
+
   const onClickHandler = (event: Konva.KonvaEventObject<MouseEvent>) => {
     if (mode === "create") {
-      setIsDisabledBtns(true);
+      setIsDisabledBtns({
+        ...isDisabledBtns,
+        load: true,
+        clear: true,
+        getPath: true,
+        create: true,
+        edit: true,
+        pathPoints: true,
+        delete: true,
+      });
       const point: IPoint = event.target.getRelativePointerPosition();
 
       const isOldPolygon = polygonList?.find((item) => item.id === newPolygonIndex);
@@ -71,17 +105,44 @@ const HomePage: React.FC = () => {
       } else {
         setPolygonList([...[...polygonList].filter((item) => item.id !== currentPolygon.id), currentPolygon]);
       }
+    } else if (mode === "pathPoints") {
+      setIsDisabledBtns({
+        ...isDisabledBtns,
+        load: true,
+        clear: true,
+        getPath: true,
+        create: true,
+        edit: true,
+        pathPoints: true,
+        delete: true,
+        finish: true,
+      });
+      const point: IPoint = event.target.getRelativePointerPosition();
+      const currentPolygon: IPolygon = {
+        id: newPolygonIndex,
+        linePoints: [],
+        points: [],
+      };
+      currentPolygon.linePoints.push(point);
+      currentPolygon.points.push(point);
+      setStartFinishPoints([...startFinishPoints, currentPolygon]);
+      setNewPolygonIndex(+uniqueId());
     }
   };
 
   const onChangeHandler = (sourcePolygon: IPolygon) => {
+    console.info("sourcePolygon", sourcePolygon);
+    console.info("startFinishPoints", startFinishPoints);
     setPolygonList(polygonList.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon)));
+    setStartFinishPoints(
+      startFinishPoints.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon))
+    );
   };
 
   const handleFinishCreate = () => {
     setNewPolygonIndex(+uniqueId());
     setMode("edit");
-    setIsDisabledBtns(false);
+    enableAllBtns();
   };
 
   const handleDeletePolygon = () => {
@@ -109,6 +170,8 @@ const HomePage: React.FC = () => {
     setPolygonList([]);
     setPath(undefined);
     selectShape(null);
+    setStartFinishPoints([]);
+    enableAllBtns();
   };
 
   const handleGetPath = () => {
@@ -123,6 +186,22 @@ const HomePage: React.FC = () => {
     }, [] as IPolygon[]);
     setPath(polygons[0]);
   };
+
+  useEffect(() => {
+    if (startFinishPoints.length === 2) {
+      setMode("edit");
+      setIsDisabledBtns({
+        ...isDisabledBtns,
+        load: false,
+        clear: false,
+        getPath: false,
+        create: false,
+        edit: false,
+        delete: false,
+        finish: false,
+      });
+    }
+  }, [startFinishPoints]);
 
   useEffect(() => {
     if (mode === "create") {
@@ -144,6 +223,16 @@ const HomePage: React.FC = () => {
             }}
           />
         ))}
+        {startFinishPoints &&
+          startFinishPoints.map((polygon, i) => (
+            <Polygon
+              key={polygon.id.toString()}
+              {...polygon}
+              onChange={onChangeHandler}
+              pointsColor={i === 0 ? Colors.dodgerBlue : Colors.darkOrange}
+              pointsRadius={5}
+            />
+          ))}
         {path && <Path key={path.id.toString()} {...path} />}
       </CanvasLayer>
       <Control

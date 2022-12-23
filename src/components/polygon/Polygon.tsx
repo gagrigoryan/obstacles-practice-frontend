@@ -10,11 +10,22 @@ import { Colors } from "../../domain/entities/colors";
 
 type PolygonProps = IPolygon & {
   onChange?: (polygon: IPolygon) => void;
-  isSelected: boolean;
-  onSelect: () => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  pointsColor?: Colors;
+  pointsRadius?: number;
 };
 
-const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, onSelect, onChange }) => {
+const Polygon: React.FC<PolygonProps> = ({
+  id,
+  points,
+  linePoints,
+  isSelected,
+  onSelect,
+  onChange,
+  pointsColor = Colors.silverSand,
+  pointsRadius = 3,
+}) => {
   const polygonRef = useRef<Konva.Line | null>(null);
   const transformerRef = useRef<Konva.Transformer | null>(null);
   const polygonPointsRef = useRef<IPoint[]>([]);
@@ -24,7 +35,7 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
     onChange?.({
       id,
       linePoints: linePoints.map((linePoint, index) => (index === sourceIndex ? sourcePoint : linePoint)),
-      points,
+      points: points.map((point, index) => (index === sourceIndex ? sourcePoint : point)),
     });
   };
 
@@ -119,7 +130,13 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
 
       {!isDragged &&
         points.map((point, index) => (
-          <Point key={index.toString()} {...point} onChange={(point) => onPointChangeHandler(point, index)} />
+          <Point
+            key={index.toString()}
+            {...point}
+            pointColor={pointsColor}
+            pointRadius={pointsRadius}
+            onChange={(point) => onPointChangeHandler(point, index)}
+          />
         ))}
     </>
   );

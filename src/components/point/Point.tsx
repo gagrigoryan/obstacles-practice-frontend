@@ -8,9 +8,17 @@ type PointProps = IPoint & {
   onChange?: (point: IPoint) => void;
   isDraggable?: boolean;
   pointColor?: Colors;
+  pointRadius?: number;
 };
 
-const Point: React.FC<PointProps> = ({ onChange, x, y, isDraggable = true, pointColor = Colors.silverSand }) => {
+const Point: React.FC<PointProps> = ({
+  onChange,
+  x,
+  y,
+  isDraggable = true,
+  pointColor = Colors.silverSand,
+  pointRadius = 3,
+}) => {
   const [isHovered, setHovered] = useState<boolean>(false);
 
   const onDragMoveHandler = (event: Konva.KonvaEventObject<DragEvent>) => {
@@ -25,7 +33,7 @@ const Point: React.FC<PointProps> = ({ onChange, x, y, isDraggable = true, point
       <Circle
         x={x}
         y={y}
-        radius={isHovered ? 5 : 3}
+        radius={isHovered ? pointRadius + 2 : pointRadius}
         stroke={isHovered ? Colors.lightRed : pointColor}
         fill={isHovered ? undefined : pointColor}
         draggable={isDraggable}

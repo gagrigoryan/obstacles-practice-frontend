@@ -6,6 +6,7 @@ import s from "./Control.module.scss";
 
 import { IMode } from "../../HomePage";
 import { IPoint } from "../../../../domain/entities/point";
+import { BtnsDisable } from "../../../../domain/entities/btns";
 
 type ControlProps = {
   setMode: (mode: IMode) => void;
@@ -13,13 +14,13 @@ type ControlProps = {
   onFinishCreate: () => void;
   onDeletePolygon: () => void;
   selectedId: number | null;
-  isDisabledBtns: boolean;
+  isDisabledBtns: BtnsDisable;
   handleSetPolygonsFromFile: (polygons: IPoint[][]) => void;
   handleClearScreen: () => void;
   onGetPath: () => void;
 };
 
-const modes: IMode[] = ["create", "edit"];
+const modes: IMode[] = ["create", "edit", "pathPoints"];
 
 const Control: React.FC<ControlProps> = ({
   setMode,
@@ -38,14 +39,14 @@ const Control: React.FC<ControlProps> = ({
         <UploadButton
           className={s.controlButton}
           handleFile={handleSetPolygonsFromFile}
-          isDisabledBtns={isDisabledBtns}
+          isDisabledBtns={isDisabledBtns.load}
         />
 
-        <button className={s.controlButton} onClick={handleClearScreen} disabled={isDisabledBtns}>
+        <button className={s.controlButton} onClick={handleClearScreen} disabled={isDisabledBtns.clear}>
           Clear
         </button>
 
-        <button className={s.controlButton} onClick={onGetPath}>
+        <button className={s.controlButton} onClick={onGetPath} disabled={isDisabledBtns.getPath}>
           Get path
         </button>
 
@@ -54,19 +55,19 @@ const Control: React.FC<ControlProps> = ({
             key={text}
             className={`${s.controlButton} ${mode === text && s.activeButton}`}
             onClick={() => setMode(text)}
-            disabled={text === "edit" && isDisabledBtns}>
+            disabled={isDisabledBtns[text]}>
             {text}
           </button>
         ))}
       </div>
       <div className={s.additionalControl}>
         {mode === "create" && (
-          <button className={s.controlButton} onClick={onFinishCreate}>
+          <button className={s.controlButton} onClick={onFinishCreate} disabled={isDisabledBtns.finish}>
             Finish
           </button>
         )}
         {mode === "edit" && !isNil(selectedId) && (
-          <button className={s.controlButton} onClick={onDeletePolygon}>
+          <button className={s.controlButton} onClick={onDeletePolygon} disabled={isDisabledBtns.delete}>
             Delete
           </button>
         )}
