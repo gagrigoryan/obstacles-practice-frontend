@@ -13,7 +13,6 @@ type ControlProps = {
   mode: IMode;
   onFinishCreate?: () => void;
   onDeletePolygon?: () => void;
-  onCalculate?: () => void;
   selectedId: number | null;
   isDisabledBtns: BtnsDisable;
   handleSetPolygonsFromFile: (polygons: IPoint[][]) => void;
@@ -22,7 +21,7 @@ type ControlProps = {
   onReset?: () => void;
 };
 
-const modes: IMode[] = ["create", "edit", "pathPoints"];
+const modes: IMode[] = ["pathPoints", "create", "edit"];
 
 const Control: React.FC<ControlProps> = ({
   setMode,
@@ -35,7 +34,6 @@ const Control: React.FC<ControlProps> = ({
   handleClearScreen,
   onGetPath,
   onReset,
-  onCalculate,
 }) => {
   return (
     <div className={s.root}>
@@ -46,12 +44,16 @@ const Control: React.FC<ControlProps> = ({
           isDisabledBtns={isDisabledBtns.load}
         />
 
-        <button className={s.controlButton} onClick={handleClearScreen} disabled={isDisabledBtns.clear}>
-          Clear
-        </button>
-
         <button className={s.controlButton} onClick={onGetPath} disabled={isDisabledBtns.getPath}>
           Get path
+        </button>
+
+        <button type="button" className={s.controlButton} onClick={onReset} disabled={isDisabledBtns.reset}>
+          Reset path
+        </button>
+
+        <button className={s.controlButton} onClick={handleClearScreen} disabled={isDisabledBtns.clear}>
+          Clear
         </button>
 
         {modes.map((text) => (
@@ -74,14 +76,6 @@ const Control: React.FC<ControlProps> = ({
             Delete
           </button>
         )}
-      </div>
-      <div className={s.calculateWrapper}>
-        <button type="button" className={s.controlButton} onClick={onCalculate}>
-          Calculate
-        </button>
-        <button type="button" className={s.controlButton} onClick={onReset}>
-          Reset
-        </button>
       </div>
     </div>
   );

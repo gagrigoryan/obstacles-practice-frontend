@@ -18,7 +18,6 @@ import { IPath } from "../../domain/entities/path";
 import { Line } from "react-konva";
 import { getPreparedPoints } from "../../utils/getPreparedPoints";
 import { fetchMinimalPath } from "../../domain/services/api/adapters/minimalPath";
-
 export type IMode = "create" | "edit" | "pathPoints";
 
 const mockPath = [
@@ -49,6 +48,7 @@ const HomePage: React.FC = () => {
   const [selectedId, selectShape] = useState<number | null>(null);
   const [mode, setMode] = useState<IMode>("edit");
   const [newPolygonIndex, setNewPolygonIndex] = useState<number>(+uniqueId());
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isDisabledBtns, setIsDisabledBtns] = useState<BtnsDisable>({
     load: false,
     clear: false,
@@ -58,6 +58,7 @@ const HomePage: React.FC = () => {
     pathPoints: false,
     delete: false,
     finish: false,
+    reset: false,
   });
 
   const [calculatedMinimalPath, setCalculatedMinimalPath] = useState<IPath | null>(null);
@@ -81,6 +82,7 @@ const HomePage: React.FC = () => {
       pathPoints: false,
       delete: false,
       finish: false,
+      reset: false,
     });
   };
 
@@ -95,6 +97,7 @@ const HomePage: React.FC = () => {
         edit: true,
         pathPoints: true,
         delete: true,
+        reset: true,
       });
       const point: IPoint = event.target.getRelativePointerPosition();
 
@@ -124,6 +127,7 @@ const HomePage: React.FC = () => {
         pathPoints: true,
         delete: true,
         finish: true,
+        reset: true,
       });
       const point: IPoint = event.target.getRelativePointerPosition();
       const currentPolygon: IPolygon = {
@@ -139,8 +143,6 @@ const HomePage: React.FC = () => {
   };
 
   const onChangeHandler = (sourcePolygon: IPolygon) => {
-    console.info("sourcePolygon", sourcePolygon);
-    console.info("startFinishPoints", startFinishPoints);
     setPolygonList(polygonList.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon)));
     setStartFinishPoints(
       startFinishPoints.map((polygon) => (polygon.id === sourcePolygon.id ? sourcePolygon : polygon))
@@ -188,18 +190,25 @@ const HomePage: React.FC = () => {
       return;
     }
     try {
-      const preparedData = getPreparedPointForRequest(polygonList);
+      const preparedData = getPreparedPointForRequest([...polygonList, ...startFinishPoints]);
+      setIsFetching(true);
       const response = await fetchVisibilityGraph(preparedData);
       const { length } = response.nodes;
       const minimalPathResponse = await fetchMinimalPath({
         ...response,
-        start: length - 2,
-        finish: length - 1,
+        start: response.nodes.findIndex(
+          (node) => node.x === startFinishPoints[0].points[0].x && node.y === startFinishPoints[0].points[0].y
+        ),
+        finish: response.nodes.findIndex(
+          (node) => node.x === startFinishPoints[1].points[0].x && node.y === startFinishPoints[1].points[0].y
+        ),
       });
 
       setCalculatedMinimalPath(minimalPathResponse.path);
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -217,7 +226,7 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (startFinishPoints.length === 2) {
+    if (startFinishPoints.length === 2 && mode === "pathPoints") {
       setMode("edit");
       setIsDisabledBtns({
         ...isDisabledBtns,
@@ -228,6 +237,7 @@ const HomePage: React.FC = () => {
         edit: false,
         delete: false,
         finish: false,
+        reset: false,
       });
     }
   }, [startFinishPoints, isDisabledBtns, setIsDisabledBtns]);
@@ -239,7 +249,7 @@ const HomePage: React.FC = () => {
   }, [mode]);
 
   return (
-    <main className={styles.container}>
+    <main className={isFetching ? styles.containerOpacity : ""}>
       <CanvasLayer onClick={onClickHandler} checkDeselect={checkDeselect}>
         {polygonList.map((polygon) => (
           <Polygon
@@ -262,8 +272,9 @@ const HomePage: React.FC = () => {
               pointsRadius={5}
             />
           ))}
-        {path && <Path key={path.id.toString()} {...path} />}
-        {/* {calculatedMinimalPath != null && <Line stroke="#0288d1" points={getPreparedPoints(calculatedMinimalPath)} />} */}
+        {calculatedMinimalPath != null && (
+          <Line stroke={Colors.pastelGreen} strokeWidth={3} points={getPreparedPoints(calculatedMinimalPath)} />
+        )}
       </CanvasLayer>
       <Control
         setMode={setMode}
@@ -274,8 +285,7 @@ const HomePage: React.FC = () => {
         isDisabledBtns={isDisabledBtns}
         handleSetPolygonsFromFile={handleSetPolygonsFromFile}
         handleClearScreen={handleClearScreen}
-        onGetPath={handleGetPath}
-        onCalculate={handleCalculateClick}
+        onGetPath={handleCalculateClick}
         onReset={() => setCalculatedMinimalPath(null)}
       />
     </main>

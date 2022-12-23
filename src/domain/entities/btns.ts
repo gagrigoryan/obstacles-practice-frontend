@@ -7,4 +7,5 @@ export type BtnsDisable = {
   pathPoints: boolean;
   delete: boolean;
   finish: boolean;
+  reset: boolean;
 };
