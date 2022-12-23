@@ -201,7 +201,7 @@ const HomePage: React.FC = () => {
         finish: false,
       });
     }
-  }, [startFinishPoints]);
+  }, [startFinishPoints, isDisabledBtns, setIsDisabledBtns]);
 
   useEffect(() => {
     if (mode === "create") {
