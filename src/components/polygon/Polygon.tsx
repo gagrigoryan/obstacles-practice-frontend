@@ -23,7 +23,7 @@ const Polygon: React.FC<PolygonProps> = ({ id, points, linePoints, isSelected, o
     onChange?.({
       id,
       linePoints: linePoints.map((linePoint, index) => (index === sourceIndex ? sourcePoint : linePoint)),
-      points,
+      points: points.map((linePoint, index) => (index === sourceIndex ? sourcePoint : linePoint)),
     });
   };
 

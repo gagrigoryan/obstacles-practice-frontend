@@ -10,12 +10,14 @@ import { IPoint } from "../../../../domain/entities/point";
 type ControlProps = {
   setMode: (mode: IMode) => void;
   mode: IMode;
-  onFinishCreate: () => void;
-  onDeletePolygon: () => void;
+  onFinishCreate?: () => void;
+  onDeletePolygon?: () => void;
+  onCalculate?: () => void;
   selectedId: number | null;
-  isDisabledEditBtn: boolean;
+  isDisabledEditBtn?: boolean;
   handleSetPolygonsFromFile: (polygons: IPoint[][]) => void;
-  handleClearScreen: () => void;
+  handleClearScreen?: () => void;
+  onReset?: () => void;
 };
 
 const modes: IMode[] = ["create", "edit"];
@@ -26,9 +28,11 @@ const Control: React.FC<ControlProps> = ({
   onFinishCreate,
   selectedId,
   onDeletePolygon,
+  onCalculate,
   isDisabledEditBtn,
   handleSetPolygonsFromFile,
   handleClearScreen,
+  onReset,
 }) => {
   return (
     <div className={s.root}>
@@ -48,18 +52,25 @@ const Control: React.FC<ControlProps> = ({
             {text}
           </button>
         ))}
-      </div>
-      <div className={s.additionalControl}>
+
         {mode === "create" && (
-          <button className={s.controlButton} onClick={onFinishCreate}>
+          <button className={s.additionalButton} onClick={onFinishCreate}>
             Finish
           </button>
         )}
         {mode === "edit" && !isNil(selectedId) && (
-          <button className={s.controlButton} onClick={onDeletePolygon}>
+          <button className={s.additionalButton} onClick={onDeletePolygon}>
             Delete
           </button>
         )}
+      </div>
+      <div className={s.calculateWrapper}>
+        <button type="button" className={s.controlButton} onClick={onCalculate}>
+          Calculate
+        </button>
+        <button type="button" className={s.controlButton} onClick={onReset}>
+          Reset
+        </button>
       </div>
     </div>
   );
